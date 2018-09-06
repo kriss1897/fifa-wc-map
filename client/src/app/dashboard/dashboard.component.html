@@ -1,0 +1,23 @@
+<!-- <mat-card style="padding:15px;margin-top:10px">
+  <mat-card-content>
+    <div *ngIf="competition">
+      <mat-list>
+          <h3 mat-subheader>Matches</h3>
+          <mat-list-item *ngFor="let match of matches">
+            <h4 mat-line>{{match.home}}</h4>
+            <p mat-line> {{match.team}} </p>
+          </mat-list-item>
+          
+        </mat-list>
+    </div>
+  </mat-card-content>
+</mat-card> -->
+
+<div id="matches">
+  <mat-card *ngFor="let match of matches">
+    <mat-card-content>
+      <h4>{{match.home}} v/s {{match.team}}</h4>
+      <p mat-line>{{match.attendance}}</p>
+    </mat-card-content>
+  </mat-card>
+</div>

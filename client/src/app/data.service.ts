@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
-import { environment } from '../environments/environment';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import * as mapboxgl from 'mapbox-gl';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../environments/environment';
 
-@Injectable()
-export class MapService {
-
+@Injectable({
+  providedIn: 'root'
+})
+export class DataService {
   constructor(
     private http: HttpClient
   ) { 
@@ -16,7 +17,7 @@ export class MapService {
     return this.http.get('http://localhost:3000/competitions');
   }
 
-  getMatches(){
-    return this.http.get('http://localhost:3000/matches/year/2014');
+  getMatches(year: Number){
+    return this.http.get(`http://localhost:3000/matches/year/${year}`);
   }
 }

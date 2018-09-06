@@ -1,7 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, OnChanges } from '@angular/core';
 import * as mapboxgl from 'mapbox-gl';
 import { MapService } from '../map.service';
 import { GeoJson, FeatureCollection } from '../map';
+
+@Component({
+  selector: 'app-marker',
+  template: "<span style='background:black;height:10px;width:10px'>marker</span>",
+})
+export class Marker {
+  constructor() {}
+}
 
 @Component({
   selector: 'app-map-box',
@@ -9,42 +17,34 @@ import { GeoJson, FeatureCollection } from '../map';
   styleUrls: ['./map-box.component.scss'],
   providers: [MapService]
 })
-export class MapBoxComponent implements OnInit {
+export class MapBoxComponent implements OnInit,OnChanges{
   // settings
   map: mapboxgl.Map;
-  // style = 'mapbox://styles/kriss1897/cjlm7ias536vx2ss944qunq0a';
-  style = 'mapbox://styles/mapbox/light-v9';
-  lat = -74.50;
-  lng = 40;
+  style = 'mapbox://styles/mapbox/streets-v10';
+  lat = 13.932717;
+  lng = -16.467999;
   zoom = 2;
-  message = 'Hello World!';
 
   // data
-  source: any;
-  markers: any;
+  @Input() competitions: any = [];
+  @Input() matches: any = [];
+  markers:any = [];
 
   // constructor
   constructor(private mapService: MapService) { }
 
   ngOnInit() {
-    this.markers = [];
     this.initializeMap();
-    this.source = this.mapService.getCountries();
+  }
+
+  ngOnChanges(){
+    this.clearMarkers();
+    // this.plotCompetitions(this.competitions);
+    this.plotMatches(this.matches);
   }
 
   // initialize map
   private initializeMap() {
-    /// locate the user
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(position => {
-        this.lat = position.coords.latitude;
-        this.lng = position.coords.longitude;
-        this.map.flyTo({
-          center: [this.lng, this.lat]
-        });
-      });
-    }
-
    this.buildMap();
   }
 
@@ -54,50 +54,72 @@ export class MapBoxComponent implements OnInit {
       style: this.style,
       center: [this.lat, this.lng],
       zoom: this.zoom,
-      minZoom:2
     });
-    this.map.addControl(new mapboxgl.NavigationControl());
+    // this.map.addControl(new mapboxgl.NavigationControl());
 
-    this.map.on('load',(event) => {
-
-      this.source.subscribe(points => {
-        console.log(points);
-        this.map.addSource('countries',{
-          type: 'geojson',
-          data: points
-        });
-
-        points.features.map(point => {
-          console.log(point.properties.flag);
-          var images = {}
-          this.map.loadImage('./'+point.properties.flag, (error, image) => {
-            this.map.addImage(point.properties.code, image); 
-          });
-        })
-
-        this.map.addLayer({
-          id: 'countries',
-          source: 'countries',
-          type: 'symbol',
-          layout: {
-            'text-field': '{name}',
-            'text-size': 12,
-            'icon-image': '{code}',
-            'icon-size': 1,
-            'text-offset': [0, 1.5]
-          },
-          paint: {
-            'text-color': '#f16624',
-          }
-        })
-      });      
-    });
-
+    // this.map.on('load',(event) => {
+    //   this.matches.subscribe(matches => this.plotMatches(matches));
+    //   this.competitions.subscribe(competitions => this.plotCompetitions(competitions));
+    // });
   }
 
   flyTo(data: GeoJson) {
     this.map.flyTo({
       center: data.geometry.coordinates
     });
+  }
+
+  plotMatches(matches){
+    var coords = [];
+    matches.map(match => {
+        var marker = document.createElement('div')
+        marker.className = '';
+        marker.innerHTML = `<i class="material-icons">place</i><br/>`
+        marker.addEventListener('click',function(){
+          window.alert(match.home);
+        })
+        
+        var loc = match.stadium.location;
+        !!loc && coords.push([loc.lng,loc.lat]);
+        !!loc && this.markers.push(new mapboxgl.Marker(marker).setLngLat([loc.lng,loc.lat]).addTo(this.map));
+    });
+    this.fitMap(coords);
+  }
+
+  plotCompetitions(competitions){
+    var coords = [];
+    competitions.map(competition => {
+      var marker = document.createElement('div');
+      marker.className = "competitionMarker";
+      marker.innerHTML = `World Cup ${competition.year}`
+      var loc = competition.location;
+
+      marker.addEventListener('click',()=>{
+        this.map.flyTo({
+          center: [loc.lng,loc.lat]
+        });
+      });
+      coords.push([loc.lng,loc.lat]);
+      this.markers.push(new mapboxgl.Marker(marker).setLngLat([loc.lng,loc.lat]).addTo(this.map));
+    })
+    this.fitMap(coords);
+  }
+
+  clearMarkers(){
+    this.markers.map(marker => marker.remove());
+  }
+
+  fitMap(markers){
+    if(markers.length > 0){
+      var minLng = Math.min.apply(null, markers.map(function (e) { return e[0]}))
+      var minLat = Math.min.apply(null, markers.map(function (e) { return e[1]}))
+      var maxLng = Math.max.apply(null, markers.map(function (e) { return e[0]}))
+      var maxLat = Math.max.apply(null, markers.map(function (e) { return e[1]}))
+      this.map.fitBounds([
+        [minLng,minLat],
+        [maxLng,maxLat],
+      ],{padding:100});
+    }
+      
   }
 }

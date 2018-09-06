@@ -1,1 +1,25 @@
-<app-map-box></app-map-box>
+<div>
+    <div style="position:absolute;top:0;bottom:0;left:0;width:300px;z-index:2;padding:10px">
+        <mat-card style="padding:15px;margin:0;">
+            <mat-card-content>
+                <mat-select placeholder="Year" style="height:20px" [(value)]="selectedCompetition" (selectionChange)="displayMatches()">
+                    <mat-option *ngFor="let comp of competitions" [value]="comp">
+                        {{comp.host}}, {{comp.year}}
+                    </mat-option>
+                </mat-select>
+            </mat-card-content>
+        </mat-card>
+        <app-dashboard [competition]="selectedCompetition" [matches]="matches" *ngIf="selectedCompetition"></app-dashboard>
+    </div>
+    <div style="position:absolute;top:0;right:0;bottom:0;left:0;z-index:1">
+        <app-map-box [competitions]="competitions" [matches]="matches"></app-map-box>
+    </div>
+</div>
+
+
+
+<span id="sidebar" style="max-height:100vh;padding:0" hidden>
+
+        
+
+</span>
