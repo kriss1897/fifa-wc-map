@@ -7,30 +7,12 @@ var Competition = require('../models/competition');
  * @description List all the competitions
  */
 router.get('/',function(req,res,next){
-    req.features = [];
     Competition.find(function(error,competition){
-        if(error) throw error;
-        competition.forEach(function(comp){
-            req.features.push({
-                type: "Feature",
-                geometry: {
-                    "type": "Point",
-                    "coordinates": [comp.location.lng,comp.location.lat]
-                },
-                properties: {
-                    'name': comp.host,
-                    'flag': 'assets/flags/'+comp.alpha2Code.toLowerCase()+'.png',
-                    'code': comp.country.code
-                }
-            });
-        });
+        req.competitions = competition;
         next();
     });
 },function(req,res){
-    res.json({
-        type:"FeatureCollection",
-        features: req.features
-    });
+    res.json(req.competitions);
 });
 
 /**
