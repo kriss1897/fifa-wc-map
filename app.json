@@ -1,0 +1,7 @@
+{
+    "name": "Fifa World Cup Map",
+    "description": "Fifa World Cup Map",
+    "repository": "https://github.com/kriss1897/fifa-wc-map",
+    "keywords": ["node", "express", "heroku"],
+    "image": "heroku/nodejs"
+  }

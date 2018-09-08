@@ -3,11 +3,6 @@ import {AngularFireAuth} from '@angular/fire/auth'
 import { auth } from 'firebase';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material';
 
-export interface Note {
-  note: string;
-  date: Date;
-}
-
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
@@ -59,7 +54,7 @@ export class AddNoteDialog {
   note : string = '';
   constructor(
     public dialogRef: MatDialogRef<AddNoteDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: Note
+    @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
 
   add(): void {

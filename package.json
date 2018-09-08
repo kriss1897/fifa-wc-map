@@ -1,0 +1,26 @@
+{
+  "name": "fifa-wc-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server/src/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server/src/app.js"
+  },
+  "engines": {
+    "node": "8.9.1"
+  },
+  "dependencies": {
+    "server": "./server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kriss1897/fifa-wc-map.git"
+  },
+  "author": "kriss1897",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kriss1897/fifa-wc-map/issues"
+  },
+  "homepage": "https://github.com/kriss1897/fifa-wc-map#readme"
+}
