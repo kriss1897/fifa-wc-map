@@ -28,6 +28,6 @@ app.use('/',indexRouter);
 app.use('/matches', matchesRouter);
 app.use('/competitions', competitonsRouter)
 
-// app.listen(PORT, () => console.log(`Listening on ${ PORT }`))
+app.listen(PORT, () => console.log(`Listening on ${ PORT }`))
 
 module.exports = app;
