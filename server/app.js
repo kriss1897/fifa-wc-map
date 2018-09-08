@@ -4,9 +4,9 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
 
-var matchesRouter = require('./routes/matches');
-var competitonsRouter = require('./routes/competitions')
-var indexRouter = require('./routes/index');
+var matchesRouter = require('./src/routes/matches');
+var competitonsRouter = require('./src/routes/competitions')
+var indexRouter = require('./src/routes/index');
 
 var app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,7 +23,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname,'./../public')))
+app.use(express.static(path.join(__dirname,'public')))
 app.use('/',indexRouter);
 app.use('/matches', matchesRouter);
 app.use('/competitions', competitonsRouter)
