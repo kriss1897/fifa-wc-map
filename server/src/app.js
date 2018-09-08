@@ -9,6 +9,7 @@ var competitonsRouter = require('./routes/competitions')
 var indexRouter = require('./routes/index');
 
 var app = express();
+const PORT = process.env.PORT || 3000;
 
 mongoose.connect('mongodb://kriss:secret1897@ds149732.mlab.com:49732/fifa-wc-map',{useNewUrlParser:true});
 
@@ -26,5 +27,7 @@ app.use(express.static(path.join(__dirname,'./../public')))
 app.use('/',indexRouter);
 app.use('/matches', matchesRouter);
 app.use('/competitions', competitonsRouter)
+
+app.listen(PORT, () => console.log(`Listening on ${ PORT }`))
 
 module.exports = app;
