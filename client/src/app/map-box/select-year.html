@@ -1,0 +1,6 @@
+<mat-nav-list>
+    <a mat-list-item *ngFor="let itr of data.iterations" (click)="selectIteration(itr)">
+      <span mat-line><b>{{data._id.country}} World Cup, {{itr.year}}</b></span>
+      <span mat-line>{{itr.teams}} Teams, {{itr.attendance}} People, {{itr.goals}} Goals</span>
+    </a>
+</mat-nav-list>

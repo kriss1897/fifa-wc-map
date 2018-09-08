@@ -14,10 +14,14 @@ export class DataService {
   }
 
   getCompetitions() {
-    return this.http.get('http://localhost:3000/competitions');
+    return this.http.get(`${environment.url}/competitions`);
   }
 
   getMatches(year: Number){
-    return this.http.get(`http://localhost:3000/matches/year/${year}`);
+    return this.http.get(`${environment.url}/matches/year/${year}`);
+  }
+
+  getStats(){
+    return this.http.get(`${environment.url}/competitions/stats`);
   }
 }

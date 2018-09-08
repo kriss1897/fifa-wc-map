@@ -1,25 +1,27 @@
-<div>
-    <div style="position:absolute;top:0;bottom:0;left:0;width:300px;z-index:2;padding:10px">
-        <mat-card style="padding:15px;margin:0;">
-            <mat-card-content>
-                <mat-select placeholder="Year" style="height:20px" [(value)]="selectedCompetition" (selectionChange)="displayMatches()">
-                    <mat-option *ngFor="let comp of competitions" [value]="comp">
-                        {{comp.host}}, {{comp.year}}
-                    </mat-option>
-                </mat-select>
-            </mat-card-content>
-        </mat-card>
-        <app-dashboard [competition]="selectedCompetition" [matches]="matches" *ngIf="selectedCompetition"></app-dashboard>
-    </div>
-    <div style="position:absolute;top:0;right:0;bottom:0;left:0;z-index:1">
-        <app-map-box [competitions]="competitions" [matches]="matches"></app-map-box>
-    </div>
-</div>
-
-
-
-<span id="sidebar" style="max-height:100vh;padding:0" hidden>
-
-        
-
-</span>
+<mat-drawer-container style="height:100%">
+    <mat-drawer mode="side" opened style="padding-top:50px" style="width:350px;background:#f4f4f4">
+        <h2 style="margin-left:10px">Fifa World Cup Map</h2>
+        <app-dashboard style="min-height: 100%;" [matches]="matches" [competition]="selectedCompetition" (matchSelected)="goToStadium($event)"></app-dashboard>
+        <mat-accordion>
+            <h4 style="margin-left:10px">All Time Winners</h4>
+            <mat-expansion-panel *ngFor="let team of stats" displayMode='flat'>
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        {{team._id}}
+                    </mat-panel-title>
+                    <mat-panel-description>
+                        {{team.years.length}} Times
+                    </mat-panel-description>
+                </mat-expansion-panel-header>
+                <ng-template matExpansionPanelContent>
+                    <mat-chip-list class="mat-chip-list-stacked">
+                        <mat-chip (click)="selectCompetitionYear(year)" mat-line color="primary" selected *ngFor="let year of team.years">{{year}}</mat-chip>
+                    </mat-chip-list>
+                </ng-template>
+            </mat-expansion-panel>
+        </mat-accordion>
+    </mat-drawer>
+    <mat-drawer-content>
+        <app-map-box [competitions]="competitions" [matches]="matches" (competitionSelected)="updateSelectedCompetition($event)"></app-map-box>
+    </mat-drawer-content>
+</mat-drawer-container>

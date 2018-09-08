@@ -1,23 +1,41 @@
-<!-- <mat-card style="padding:15px;margin-top:10px">
-  <mat-card-content>
-    <div *ngIf="competition">
-      <mat-list>
-          <h3 mat-subheader>Matches</h3>
-          <mat-list-item *ngFor="let match of matches">
-            <h4 mat-line>{{match.home}}</h4>
-            <p mat-line> {{match.team}} </p>
-          </mat-list-item>
-          
-        </mat-list>
-    </div>
-  </mat-card-content>
-</mat-card> -->
-
-<div id="matches">
-  <mat-card *ngFor="let match of matches">
-    <mat-card-content>
-      <h4>{{match.home}} v/s {{match.team}}</h4>
-      <p mat-line>{{match.attendance}}</p>
-    </mat-card-content>
-  </mat-card>
+<div id="matches" *ngIf="competition; else noMatches">
+  <div style="margin: 10px">
+    <h3>{{competition.host}} World Cup, {{competition.year}}</h3>
+    <mat-chip-list>
+      <mat-chip>{{competition.teams}} Teams</mat-chip>
+      <mat-chip>{{competition.matches}} Matches</mat-chip>
+      <mat-chip>{{competition.attendance}} Fans</mat-chip>
+    </mat-chip-list>
+    <h4>Positions</h4>
+    <mat-chip-list class="mat-chip-list-stacked">
+      <mat-chip color="primary" selected>1. {{competition.winner}}</mat-chip>
+      <mat-chip>2. {{competition.runnersUp}}</mat-chip>
+      <mat-chip>3. {{competition.third}}</mat-chip>
+      <mat-chip>4. {{competition.fourth}}</mat-chip>
+    </mat-chip-list>
+  </div>
+  <mat-accordion>
+    <h4>&nbsp;&nbsp;&nbsp;Matches</h4>
+    <mat-expansion-panel *ngFor="let match of matches" (opened)="selectMatch(match)" displayMode='flat'>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          {{match.home}} ({{match.finalHomeScore}}) v/s ({{match.finalAwayScore}}) {{match.team}}
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <ng-template matExpansionPanelContent>
+        <p>Attendance: {{match.attendance}}<br/>
+        Date: {{match.datetime}}</p>
+        <div *ngIf="afAuth.user | async as user">
+          <span>Notes</span><br/>
+          <button mat-flat-button color="primary" (click)="addNote(match)">Add Note</button>
+        </div>
+      </ng-template>
+    </mat-expansion-panel>
+  </mat-accordion>
 </div>
+<ng-template #noMatches>
+  <div style="height:100vh;display:flex;flex-direction:column;justify-content: center;align-items: center">
+      <h4>No Tournament Selected</h4>
+      <span>Please select a competition from the map</span>
+  </div>
+</ng-template>

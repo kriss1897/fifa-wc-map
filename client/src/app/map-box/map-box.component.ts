@@ -1,15 +1,8 @@
-import { Component, OnInit, Input, OnChanges } from '@angular/core';
+import { Component, OnInit, Input, OnChanges, EventEmitter, Output, Inject } from '@angular/core';
 import * as mapboxgl from 'mapbox-gl';
 import { MapService } from '../map.service';
 import { GeoJson, FeatureCollection } from '../map';
-
-@Component({
-  selector: 'app-marker',
-  template: "<span style='background:black;height:10px;width:10px'>marker</span>",
-})
-export class Marker {
-  constructor() {}
-}
+import { MAT_BOTTOM_SHEET_DATA, MatBottomSheet, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 
 @Component({
   selector: 'app-map-box',
@@ -20,18 +13,25 @@ export class Marker {
 export class MapBoxComponent implements OnInit,OnChanges{
   // settings
   map: mapboxgl.Map;
-  style = 'mapbox://styles/mapbox/streets-v10';
+  style = 'mapbox://styles/mapbox/dark-v9';
   lat = 13.932717;
   lng = -16.467999;
-  zoom = 2;
+  zoom = 1;
+  private zoomThreshold = 3;
 
   // data
   @Input() competitions: any = [];
   @Input() matches: any = [];
   markers:any = [];
 
+  // triggers
+  @Output() competitionSelected = new EventEmitter<object>();
+
   // constructor
-  constructor(private mapService: MapService) { }
+  constructor(
+    private mapService: MapService,
+    private selectYearBottomSheet: MatBottomSheet
+  ) { }
 
   ngOnInit() {
     this.initializeMap();
@@ -39,7 +39,7 @@ export class MapBoxComponent implements OnInit,OnChanges{
 
   ngOnChanges(){
     this.clearMarkers();
-    // this.plotCompetitions(this.competitions);
+    this.plotCompetitions(this.competitions);
     this.plotMatches(this.matches);
   }
 
@@ -54,53 +54,77 @@ export class MapBoxComponent implements OnInit,OnChanges{
       style: this.style,
       center: [this.lat, this.lng],
       zoom: this.zoom,
+      minZoom: 1,
     });
-    // this.map.addControl(new mapboxgl.NavigationControl());
+    
+    this.map.addControl(new mapboxgl.NavigationControl());
 
-    // this.map.on('load',(event) => {
-    //   this.matches.subscribe(matches => this.plotMatches(matches));
-    //   this.competitions.subscribe(competitions => this.plotCompetitions(competitions));
-    // });
+    this.map.on('load',(event) => {
+      this.map.on('zoom',()=>{
+        if(this.map.getZoom() > this.zoomThreshold){
+          document.body.classList.add('zoomed')
+          document.body.classList.remove('world')
+        } else {
+          document.body.classList.add('world')
+          document.body.classList.remove('zoomed')
+        }
+      });
+    });
   }
 
-  flyTo(data: GeoJson) {
+  flyTo(data) {
     this.map.flyTo({
       center: data.geometry.coordinates
     });
   }
 
   plotMatches(matches){
-    var coords = [];
+    let coords = [];
+    let plotted = [];
     matches.map(match => {
-        var marker = document.createElement('div')
-        marker.className = '';
-        marker.innerHTML = `<i class="material-icons">place</i><br/>`
-        marker.addEventListener('click',function(){
-          window.alert(match.home);
-        })
+      let loc = match.stadium.location;
+      if(!!loc && plotted.indexOf(match.stadium._id) < 0){
+        let marker = document.createElement('div')
+        marker.className = 'matchMarker';
+        marker.id = match.stadium._id;
+        marker.innerHTML = `<img src="/assets/stadium.png" height="20px">`
         
-        var loc = match.stadium.location;
-        !!loc && coords.push([loc.lng,loc.lat]);
-        !!loc && this.markers.push(new mapboxgl.Marker(marker).setLngLat([loc.lng,loc.lat]).addTo(this.map));
+        this.markers.push(new mapboxgl.Marker(marker).setLngLat([loc.lng,loc.lat]).addTo(this.map));
+        coords.push([loc.lng,loc.lat]); plotted.push(match.stadium._id);
+      }
     });
     this.fitMap(coords);
   }
 
   plotCompetitions(competitions){
-    var coords = [];
+    let coords = [];
     competitions.map(competition => {
-      var marker = document.createElement('div');
-      marker.className = "competitionMarker";
-      marker.innerHTML = `World Cup ${competition.year}`
-      var loc = competition.location;
+        // Create the marker
+        var marker = document.createElement('div');
+        marker.className = "competitionMarker";
+        marker.classList.add('mat-elevation-z2');
+        let years = competition.iterations.map(itr => itr.year);
+        marker.innerHTML = `${competition._id.country}:${years}`
+        var loc = competition.location;
 
-      marker.addEventListener('click',()=>{
-        this.map.flyTo({
-          center: [loc.lng,loc.lat]
+        marker.addEventListener('click',()=>{
+          if(competition.iterations.length == 1){
+            this.map.flyTo({
+              center: [loc.lng,loc.lat],
+              zoom: 3
+            });
+            this.competitionSelected.emit(competition.iterations[0]);
+          }else if(competition.iterations.length > 1){
+            let bottomSheet = this.selectYearBottomSheet.open(MapBoxSelectYear,{
+              data: competition
+            });
+            bottomSheet.afterDismissed().subscribe(iteration => {
+              this.competitionSelected.emit(iteration);
+            });
+          }
         });
-      });
-      coords.push([loc.lng,loc.lat]);
-      this.markers.push(new mapboxgl.Marker(marker).setLngLat([loc.lng,loc.lat]).addTo(this.map));
+        coords.push([loc.lng,loc.lat]);
+        this.markers.push(new mapboxgl.Marker(marker).setLngLat([loc.lng,loc.lat]).addTo(this.map));      
     })
     this.fitMap(coords);
   }
@@ -119,7 +143,38 @@ export class MapBoxComponent implements OnInit,OnChanges{
         [minLng,minLat],
         [maxLng,maxLat],
       ],{padding:100});
-    }
-      
+    }     
+  }
+
+  flyToStadium(stadium){
+    let loc = stadium.location;
+    let marker = document.getElementById(stadium._id);
+    // unselect other markers 
+    let markers = document.getElementsByClassName('selectedMarker');
+    for(let i=0;i<markers.length;i++) markers[i].classList.remove('selectedMarker');
+
+    // select new marker
+    marker.classList.add('selectedMarker');
+    this.map.flyTo({
+      center: [loc.lng,loc.lat],
+      zoom: 7
+    });
+  }
+}
+
+@Component({
+  selector: 'app-map-box-select-year',
+  templateUrl: 'select-year.html'
+})
+export class MapBoxSelectYear {
+  constructor(
+    private elementRef: MatBottomSheetRef<MapBoxSelectYear>,
+    @Inject(MAT_BOTTOM_SHEET_DATA) public data:any
+  ){
+    
+  }
+
+  selectIteration(itr){
+    this.elementRef.dismiss(itr);
   }
 }

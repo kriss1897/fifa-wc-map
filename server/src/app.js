@@ -10,7 +10,7 @@ var indexRouter = require('./routes/index');
 
 var app = express();
 
-mongoose.connect('mongodb://127.0.0.1:27017/fifaWCMap',{useNewUrlParser:true});
+mongoose.connect('mongodb://kriss:secret1897@ds149732.mlab.com:49732/fifa-wc-map',{useNewUrlParser:true});
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");

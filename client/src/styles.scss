@@ -1,10 +1,63 @@
 /* You can add global styles to this file, and also import other style files */
 @import "~@angular/material/prebuilt-themes/indigo-pink.css";
 html, body { height: 100%; }
+
+*{
+    transition: display 0.25s ease-in-out;
+}
+
 body {
     margin: 0;
     padding: 0;
     margin: 0;
     font-family: 'Roboto', sans-serif;
     overflow: hidden;
+}
+
+div.competitionMarker, div.matchMarker {
+    transition: display 0.25s ease-out;
+}
+
+div.competitionMarker {
+    background: #fff;
+    padding: 5px 15px;
+    border-radius: 15px;
+
+    &:hover{
+        cursor: pointer;
+    }
+}
+
+body.world {
+    // div.competitionMarker{
+    //     display: block;
+    // }
+    div.matchMarker,app-dashboard{
+        display: none;
+    }
+    #stats{
+        display: block;
+    }
+}
+
+body.zoomed {
+    // div.competitionMarker{
+    //     display: none !important;
+    // }
+    #stats{
+        display: none;
+    }
+    app-dashboard{
+        display: block;
+    }
+    div.matchMarker{
+        display: block;
+
+        &.selectedMarker{
+            img{
+                height: 50px;
+                width: 50px;
+            }
+        }
+    }
 }
